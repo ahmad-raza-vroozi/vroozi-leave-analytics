@@ -266,7 +266,21 @@ export default function HRLeaveDashboard() {
       wfhThuFriPct: totalWFH > 0 ? Math.round((wfhThuFriOnly / totalWFH) * 100) : 0,
     };
 
-    return { employeeStats, typeTotals, dowChart, monthlyChart, heatmap, maxHeat, topByTotal, kpis, sickThreshold };
+    // who specifically takes Annual Leave / WFH on Mondays or Fridays — surfaced
+    // at the company level so HR doesn't have to open each employee individually
+    const monFriTable = employeeStats
+      .map(emp => {
+        const monAL = emp.dowTypeCounts.Monday?.AL || 0;
+        const friAL = emp.dowTypeCounts.Friday?.AL || 0;
+        const monWFH = emp.dowTypeCounts.Monday?.WFH || 0;
+        const friWFH = emp.dowTypeCounts.Friday?.WFH || 0;
+        const total = monAL + friAL + monWFH + friWFH;
+        return { name: emp.name, monAL, friAL, monWFH, friWFH, total, flagged: emp.flags.length > 0 };
+      })
+      .filter(row => row.total > 0)
+      .sort((a, b) => b.total - a.total);
+
+    return { employeeStats, typeTotals, dowChart, monthlyChart, heatmap, maxHeat, topByTotal, kpis, sickThreshold, monFriTable };
   }, [parsed]);
 
   const filtered = useMemo(() => {
@@ -342,6 +356,10 @@ export default function HRLeaveDashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <MonFriTable rows={analysis.monFriTable} onSelect={setSelectedEmployee} />
           </div>
 
           <div style={{ marginTop: 24 }}>
@@ -677,6 +695,52 @@ function BannerCard({ title, gradient, pill, children }) {
         {pill && <span style={{ background: "rgba(255,255,255,0.2)", color: "#fff", fontSize: 11, padding: "2px 9px", borderRadius: 20 }}>{pill}</span>}
       </div>
       <div style={{ padding: "18px 20px" }}>{children}</div>
+    </div>
+  );
+}
+
+function MonFriTable({ rows, onSelect }) {
+  const chartRows = rows.map(r => ({
+    name: r.name,
+    "Mon — AL": r.monAL,
+    "Fri — AL": r.friAL,
+    "Mon — WFH": r.monWFH,
+    "Fri — WFH": r.friWFH,
+  }));
+  const chartHeight = Math.max(140, chartRows.length * 34 + 30);
+  const SCROLL_AFTER = 12;
+
+  return (
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, boxShadow: "0 1px 2px rgba(16,24,40,0.04)", overflow: "hidden" }}>
+      <div style={{ padding: "20px 22px 6px" }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: TEXT }}>Monday &amp; Friday leave / WFH — by employee</div>
+        <div style={{ fontSize: 12, color: MUTED, marginTop: 4, lineHeight: 1.5 }}>
+          Who's taking Annual Leave or WFH specifically on Mondays or Fridays — the long-weekend pattern, ranked highest first. Click a bar for the full breakdown.
+        </div>
+      </div>
+      {rows.length === 0 ? (
+        <div style={{ padding: "24px 22px 26px", color: MUTED, fontSize: 12.5 }}>No Monday or Friday Annual Leave / WFH recorded yet.</div>
+      ) : (
+        <div style={{
+          padding: "10px 22px 20px",
+          maxHeight: rows.length > SCROLL_AFTER ? 440 : "none",
+          overflowY: rows.length > SCROLL_AFTER ? "auto" : "visible",
+        }}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
+            <BarChart data={chartRows} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={BORDER} horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fontFamily: SANS }} stroke={MUTED} allowDecimals={false} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fontFamily: SANS }} stroke={MUTED} width={100} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ fontFamily: SANS, fontSize: 12, borderRadius: 8, border: `1px solid ${BORDER}` }} />
+              <Legend wrapperStyle={{ fontFamily: SANS, fontSize: 11 }} />
+              <Bar dataKey="Mon — AL" stackId="mf" fill={BLUE} radius={[0, 0, 0, 0]} onClick={(d) => onSelect?.(d.name)} cursor="pointer" />
+              <Bar dataKey="Fri — AL" stackId="mf" fill={NAVY_2} radius={[0, 0, 0, 0]} onClick={(d) => onSelect?.(d.name)} cursor="pointer" />
+              <Bar dataKey="Mon — WFH" stackId="mf" fill={TEAL} radius={[0, 0, 0, 0]} onClick={(d) => onSelect?.(d.name)} cursor="pointer" />
+              <Bar dataKey="Fri — WFH" stackId="mf" fill="#0F726A" radius={[0, 4, 4, 0]} onClick={(d) => onSelect?.(d.name)} cursor="pointer" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }
