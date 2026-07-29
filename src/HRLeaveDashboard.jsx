@@ -9,6 +9,7 @@ import {
   Users, CalendarDays, Home, Stethoscope, PlaneTakeoff, ShieldAlert, CheckCircle2,
   LayoutGrid, ChevronDown, X
 } from "lucide-react";
+import synapseLeaveLogo from "./assets/synapse-leave-logo.png";
 
 /* ---------- tokens: corporate SaaS ops-console look, matching reference ---------- */
 const BG = "#F3F5F9";
@@ -457,10 +458,7 @@ function TopNav({ onUpload, fileName, hasData, activeTab, onNavigate }) {
   return (
     <div style={{ background: CARD, borderBottom: `1px solid ${BORDER}`, padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-          <span style={{ fontWeight: 900, fontSize: 17, letterSpacing: "-0.01em", color: TEXT }}>LEAVE<span style={{ color: BLUE }}>OPS</span></span>
-          <span style={{ fontSize: 10.5, fontWeight: 800, color: MUTED, letterSpacing: "0.03em" }}>HR</span>
-        </div>
+        <img src={synapseLeaveLogo} alt="Synapse Leave" style={{ height: 42, width: "auto", display: "block" }} />
         <nav style={{ display: "flex", gap: 20, fontSize: 13.5, height: 60, alignItems: "center" }}>
           {navItems.map(({ key, label, icon: Icon }) => {
             const active = activeTab === key;
