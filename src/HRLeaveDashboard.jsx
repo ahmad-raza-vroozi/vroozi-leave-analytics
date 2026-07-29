@@ -456,10 +456,10 @@ function TopNav({ onUpload, fileName, hasData, activeTab, onNavigate }) {
     { key: "policies", label: "Policies", icon: ShieldAlert },
   ];
   return (
-    <div style={{ background: CARD, borderBottom: `1px solid ${BORDER}`, padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
+    <div style={{ background: CARD, borderBottom: `1px solid ${BORDER}`, padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-        <img src={synapseLeaveLogo} alt="Synapse Leave" style={{ height: 42, width: "auto", display: "block" }} />
-        <nav style={{ display: "flex", gap: 20, fontSize: 13.5, height: 60, alignItems: "center" }}>
+        <img src={synapseLeaveLogo} alt="Synapse Leave" style={{ height: 54, width: "auto", display: "block" }} />
+        <nav style={{ display: "flex", gap: 20, fontSize: 13.5, height: 72, alignItems: "center" }}>
           {navItems.map(({ key, label, icon: Icon }) => {
             const active = activeTab === key;
             return (
